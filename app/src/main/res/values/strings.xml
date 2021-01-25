@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">QRCodeReader</string>
+    <string name="string_go">GO!</string>
+    <string name="string_scan">SCAN!</string>
+</resources>
