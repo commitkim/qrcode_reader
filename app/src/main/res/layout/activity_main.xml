@@ -20,22 +20,22 @@
             android:autofillHints="http://" />
         <ImageButton
             android:id="@+id/go_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
             android:text="@string/string_go"
             android:src="@drawable/enter"
             android:scaleType="centerInside"
-            android:layout_margin="5dp"
+            android:layout_margin="@dimen/margin_button"
             android:background="@android:color/transparent"/>
 
         <ImageButton
             android:id="@+id/scan_button"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/size_button"
+            android:layout_height="@dimen/size_button"
             android:text="@string/string_scan"
             android:src="@drawable/scan"
             android:scaleType="centerInside"
-            android:layout_margin="5dp"
+            android:layout_margin="@dimen/margin_button"
             android:background="@android:color/transparent"/>
 
     </LinearLayout>
