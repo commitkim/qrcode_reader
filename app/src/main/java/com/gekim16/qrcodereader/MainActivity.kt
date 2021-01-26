@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         intentIntegrator.setPrompt("바코드를 사각형 안에 비춰주세요.")
         intentIntegrator.setBeepEnabled(false)  // 인식할때 소리 여부
         intentIntegrator.setBarcodeImageEnabled(false) // 이미지를 캡쳐하기 위함
-        intentIntegrator.setOrientationLocked(false) // 세로로 고정하기 위함
+        intentIntegrator.setOrientationLocked(false) // 휴대폰 방향에 따라 세로, 가로 모드를 변경하기 위함.
     }
 
     override fun onBackPressed() {
@@ -125,23 +125,11 @@ class MainActivity : AppCompatActivity() {
     ) {
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> { //요청 코드 확인
-                if (grantResults.isNotEmpty()){
-                    var result = true
-                    permissions.forEach {
-                        when(it){
-                            android.Manifest.permission.CAMERA -> {
-                                result = if(grantResults[permissions.indexOf(it)] == PackageManager.PERMISSION_DENIED){
-                                    showRationaleDialog("QR code 인식을 위해 카메라 권한이 필요합니다.") // 설명
-                                    false
-                                } else{
-                                    result
-                                }
-                            }
-                        }
-                    }
-                    if(result) { //권한이 승인 되었다면
-                        init()
-                    }
+                if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED){
+                    showRationaleDialog("QR code 인식을 위해 카메라 권한이 필요합니다.") // 설명
+                }
+                else { //권한이 승인 되었다면
+                    init()
                 }
             }
             else -> {
