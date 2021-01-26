@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                 init()
             }
             shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA) -> { // 권한이 승인되어 있지 않을 때 설명이 필요한지 확인
-                showRationaleDialog(getString(R.string.explaination_camera)) // 설명
+                showRationaleDialog(getString(R.string.explanation_camera)) // 설명
 
             }
             else -> { // 설명이 필요없다고 답했을때
@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> { //요청 코드 확인
                 if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED){
-                    showRationaleDialog(getString(R.string.explaination_camera)) // 설명
+                    showRationaleDialog(getString(R.string.explanation_camera)) // 설명
                 }
                 else { //권한이 승인 되었다면
                     init()
