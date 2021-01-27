@@ -3,17 +3,24 @@ package com.gekim16.qrcodereader
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.inputmethod.InputMethodManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Exception
 
 private const val PERMISSION_REQUEST_CODE = 123
 
@@ -21,15 +28,17 @@ class MainActivity : AppCompatActivity() {
 
     private val intentIntegrator by lazy { IntentIntegrator(this) }
     private val context by lazy { this }
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var moveSettingPage : ActivityResultLauncher<Intent>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        requestPermission()
+        setListener()
     }
 
-    private fun init(){
+    private fun setListener(){
         webView.webViewClient = object : WebViewClient(){
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
@@ -50,9 +59,32 @@ class MainActivity : AppCompatActivity() {
             inputMethodManager.hideSoftInputFromWindow(editText.windowToken,0)
         }
         scan_button.setOnClickListener {
-            intentIntegrator.initiateScan()
+            if(ContextCompat.checkSelfPermission(
+                    applicationContext,
+                    android.Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED){
+                intentIntegrator.initiateScan()
+            }
+            else{
+                requestPermission()
+            }
         }
 
+        requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+                isGranted: Boolean ->
+            if(isGranted){
+                init()
+            }
+        }
+
+        moveSettingPage = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) {
+            Log.d("jungbong",it.data.toString())
+        }
+    }
+
+    private fun init(){
         intentIntegrator.setPrompt("바코드를 사각형 안에 비춰주세요.")
         intentIntegrator.setBeepEnabled(false)  // 인식할때 소리 여부
         intentIntegrator.setBarcodeImageEnabled(false) // 이미지를 캡쳐하기 위함
@@ -69,7 +101,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) { // 현재의 액티비티에서 다른 액티비티로 넘어갔다가 돌아올때 호출되는 메소드
-
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
         if(result != null){
@@ -95,6 +126,14 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
+    private fun legacyRequestPermission(){
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(android.Manifest.permission.CAMERA),
+            PERMISSION_REQUEST_CODE
+        )
+    }
+
     private fun requestPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -105,15 +144,9 @@ class MainActivity : AppCompatActivity() {
             }
             shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA) -> { // 권한이 승인되어 있지 않을 때 설명이 필요한지 확인
                 showRationaleDialog(getString(R.string.explanation_camera)) // 설명
-
             }
             else -> { // 설명이 필요없다고 답했을때
-
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.CAMERA),
-                    PERMISSION_REQUEST_CODE
-                )
+                legacyRequestPermission()
             }
         }
     }
@@ -123,6 +156,7 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray //권한 승인, 거절 내역
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             PERMISSION_REQUEST_CODE -> { //요청 코드 확인
                 if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_DENIED){
@@ -144,10 +178,20 @@ class MainActivity : AppCompatActivity() {
         dialog.setMessage(message)
 
         dialog.setPositiveButton("Yes") { _, _ ->
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.CAMERA),
-                PERMISSION_REQUEST_CODE)
+            if(shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)) { // 권한이 승인되어 있지 않을 때 설명이 필요한지 확인
+                legacyRequestPermission()
+            }
+            else{
+                try{
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.parse("package:${BuildConfig.APPLICATION_ID}"))
+                    moveSettingPage.launch(intent)
+
+                }catch (e: Exception){
+                    e.printStackTrace()
+                }
+
+            }
+
         }
         dialog.setNegativeButton("No") { _, _ ->
             Toast.makeText(this, "권한 거절됨", Toast.LENGTH_LONG)

@@ -1,10 +1,5 @@
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+/.idea/
 /build
 /captures
 .cxx
@@ -112,14 +107,8 @@ hs_err_pid*
 
 ## Plugin-specific files:
 
-# mpeltonen/sbt-idea plugin
-.idea_modules/
-
 # JIRA plugin
 atlassian-ide-plugin.xml
-
-# Mongo Explorer plugin
-.idea/mongoSettings.xml
 
 # Crashlytics plugin (for Android Studio and IntelliJ)
 com_crashlytics_export_strings.xml
