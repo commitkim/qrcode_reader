@@ -1,4 +1,4 @@
-package com.gekim16.qrcodereader
+package com.gekim16.qrcodereader.view
 
 import android.content.Context
 import android.content.Intent
@@ -7,60 +7,85 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.widget.Adapter
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.gekim16.qrcodereader.BuildConfig
+import com.gekim16.qrcodereader.R
+import com.gekim16.qrcodereader.model.Result
+import com.gekim16.qrcodereader.model.Type
+import com.gekim16.qrcodereader.presenter.Contract
+import com.gekim16.qrcodereader.presenter.Interactor
+import com.gekim16.qrcodereader.presenter.Presenter
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
+import java.lang.Exception
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickListener {
 
     private val intentIntegrator by lazy { IntentIntegrator(this) }
-    private val context by lazy { this }
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var moveSettingPage : ActivityResultLauncher<Intent>
     private var requestPermissionFun : () -> Unit = ::requestPermission
+
+    private lateinit var presenter: Presenter
+    private lateinit var adapter: ResultAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+
+        setPresenter()
         setListener()
     }
 
+    private fun setPresenter(){
+        presenter = Presenter(Interactor(this))
+        presenter.setView(this)
+        presenter.getResults{
+            setAdapter(it)
+        }
+    }
+
+    private fun setAdapter(list:MutableList<Result>){
+        adapter = ResultAdapter(list, this, this)
+        recycler_view.layoutManager = LinearLayoutManager(this)
+        recycler_view.adapter = adapter
+    }
+
     private fun setListener(){
-        webView.webViewClient = object : WebViewClient(){
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-
-                Toast.makeText(context, "로딩 끝", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        go_button.setOnClickListener {
-            var address = editText.text.toString()
-            if(!address.startsWith("http://")){
-                address = StringBuilder("http://").append(address).toString()
+        editText.addTextChangedListener(object: TextWatcher{
+            override fun afterTextChanged(s: Editable?) {
             }
 
-            webView.loadUrl(address)
-            val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
 
-            inputMethodManager.hideSoftInputFromWindow(editText.windowToken,0)
-        }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.filterResult(s.toString())
+            }
+        })
 
         /**
          *   1. 버튼을 누름 (첫 번째 시도) -> 권한 요청 (requestPermission())
          *   4. 다시 버튼을 누름 (한번 거절 후 시도) -> 권한 요청 (requestPermission())
          *   8. 다시 버튼을 누름 (다시보지 않기 선택 후 시도) -> 설정창으로 이동하는 dialog 띄워야함 (showRequestPermissionDialog())
          */
-        scan_button.setOnClickListener {
+        floatingActionButton.setOnClickListener {
             if(ContextCompat.checkSelfPermission(
                     applicationContext,
                     android.Manifest.permission.CAMERA
@@ -102,22 +127,12 @@ class MainActivity : AppCompatActivity() {
         intentIntegrator.setOrientationLocked(false) // 휴대폰 방향에 따라 세로, 가로 모드를 변경하기 위함.
     }
 
-    override fun onBackPressed() {
-        if(webView.canGoBack()){ // 웹뷰에서 뒤로가기 할 수 있으면
-            webView.goBack()  // 뒤로가기
-        }
-        else{
-            super.onBackPressed() // 원래의 뒤로가기 기능 실행
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) { // 현재의 액티비티에서 다른 액티비티로 넘어갔다가 돌아올때 호출되는 메소드
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
 
         if(result != null){
             if(result.contents != null){
-                editText.setText(result.contents)
-                Toast.makeText(this, result.contents, Toast.LENGTH_SHORT).show()
+                presenter.addResult(result.contents)
             }
         }
         else{
@@ -179,4 +194,48 @@ class MainActivity : AppCompatActivity() {
         }
         dialog.show()
     }
+
+    override fun onLongClick(result: Result): Boolean {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setTitle("Delete")
+        dialog.setMessage("삭제하시겠습니까?")
+
+        dialog.setPositiveButton("삭제") { _, _ ->
+            presenter.deleteResult(result)
+        }
+        dialog.setNegativeButton("취소") { _, _ ->
+
+        }
+        dialog.show()
+
+        return true
+    }
+
+    override fun onClick(result: Result) {
+        try{
+            val intent: Intent? = Intent(Intent.ACTION_VIEW, Uri.parse(result.url) )
+            startActivity(intent)
+        }catch (e: Exception){
+            e.printStackTrace()
+            showToast("해당 결과를 실행할 수 없습니다.")
+        }
+
+    }
+
+    override fun addAdapterList(result: Result) {
+        adapter.addResult(result)
+    }
+
+    override fun deleteAdapterList(result: Result) {
+        adapter.deleteResult(result)
+    }
+
+    override fun showFilteredList(str: String) {
+        adapter.filter.filter(str)
+    }
+
+    override fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
+
 }

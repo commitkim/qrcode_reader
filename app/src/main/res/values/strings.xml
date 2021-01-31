@@ -3,6 +3,7 @@
     <string name="string_go">GO!</string>
     <string name="string_scan">SCAN!</string>
     <string name="explanation_camera">QR code 인식을 위해 카메라 권한이 필요합니다.</string>
+    <string name="text_recycler_view">%s (type : %s)</string>
     <dimen name="size_button">50dp</dimen>
     <dimen name="margin_button">5dp</dimen>
 </resources>
