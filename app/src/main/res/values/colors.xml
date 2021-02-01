@@ -3,4 +3,6 @@
     <color name="colorPrimary">#01579B</color>
     <color name="colorPrimaryDark">#0277BD</color>
     <color name="colorAccent">#50A3D9</color>
+    <color name="color_FAB_basic">#50A3D9</color>
+    <color name="color_FAB_ripple">#1E90FF</color>
 </resources>

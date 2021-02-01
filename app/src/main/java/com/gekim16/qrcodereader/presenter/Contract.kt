@@ -1,6 +1,5 @@
 package com.gekim16.qrcodereader.presenter
 
-import android.content.ComponentCallbacks
 import com.gekim16.qrcodereader.model.Result
 
 
@@ -23,7 +22,5 @@ interface Contract {
         fun deleteResult(result: Result)
 
         fun filterResult(str: String)
-
-
     }
 }

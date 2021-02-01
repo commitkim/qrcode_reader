@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.item.view.*
 import java.util.*
 
 class ResultAdapter(
-    private val resultList : MutableList<Result>,
+    private val resultList: MutableList<Result>,
     private val clickListener: OnClickListener,
     private val context: Context
 ) : RecyclerView.Adapter<ResultAdapter.ViewHolder>(),
@@ -21,17 +21,21 @@ class ResultAdapter(
 
     private var filteredItems = resultList
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener{
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
+        View.OnClickListener, View.OnLongClickListener {
         private lateinit var result: Result
         private val itemLayout = itemView.item_linear_layout
+
         init {
             itemLayout.setOnClickListener(this)
             itemLayout.setOnLongClickListener(this)
         }
-        fun bind(result: Result, position: Int){
+
+        fun bind(result: Result, position: Int) {
             this.result = result
             itemView.item_num.text = position.toString()
-            itemView.item_url.text = context.getString(R.string.text_recycler_view,result.url, result.type)
+            itemView.item_url.text =
+                context.getString(R.string.text_recycler_view, result.url, result.type)
         }
 
         override fun onClick(v: View?) {
@@ -56,19 +60,19 @@ class ResultAdapter(
     }
 
     override fun getFilter(): Filter {
-        return object: Filter(){
+        return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {
                 val charString = constraint.toString()
                 filteredItems =
-                    if(charString.isEmpty()){
+                    if (charString.isEmpty()) {
                         resultList
-                    }
-                    else{
+                    } else {
                         val filteredList = ArrayList<Result>()
                         filteredItems.forEach {
-                            if(it.url.toLowerCase(Locale.ROOT).contains(charString.toLowerCase(
-                                    Locale.ROOT
-                                )
+                            if (it.url.toLowerCase(Locale.ROOT).contains(
+                                    charString.toLowerCase(
+                                        Locale.ROOT
+                                    )
                                 )
                             )
                                 filteredList.add(it)
@@ -77,7 +81,7 @@ class ResultAdapter(
                         filteredList
                     }
                 val result = FilterResults()
-                result.values =filteredItems
+                result.values = filteredItems
                 return result
             }
 
@@ -89,19 +93,19 @@ class ResultAdapter(
         }
     }
 
-    fun addResult(result: Result){
+    fun addResult(result: Result) {
         resultList.add(result)
         notifyDataSetChanged()
     }
 
-    fun deleteResult(result: Result){
+    fun deleteResult(result: Result) {
         resultList.remove(result)
         notifyDataSetChanged()
     }
 
 
-    interface OnClickListener{
-        fun onLongClick(result: Result) : Boolean
+    interface OnClickListener {
+        fun onLongClick(result: Result): Boolean
 
         fun onClick(result: Result)
     }

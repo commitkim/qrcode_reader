@@ -8,7 +8,7 @@ import androidx.room.Query
 @Dao
 interface ResultDao {
     @Query("SELECT * FROM result")
-    fun selectResults() : List<Result>
+    fun selectResults(): List<Result>
 
     @Insert
     fun insertResult(result: Result)

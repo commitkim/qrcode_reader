@@ -9,14 +9,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
-class Presenter(private val interactor: Interactor) : Contract.Presenter, BasePresenter<Contract.View>() {
+class Presenter(private val interactor: Interactor) : Contract.Presenter,
+    BasePresenter<Contract.View>() {
 
-    override fun getResults(callbacks: (MutableList<Result>)->Unit){
+    override fun getResults(callbacks: (MutableList<Result>) -> Unit) {
         val results = mutableListOf<Result>()
         CoroutineScope(Default).launch {
             results.addAll(interactor.getResults())
 
-            withContext(Main){
+            withContext(Main) {
                 callbacks.invoke(results)
             }
         }
@@ -29,7 +30,7 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter, BasePr
         CoroutineScope(Default).launch {
             interactor.addResult(result)
 
-            withContext(Main){
+            withContext(Main) {
                 getView()?.addAdapterList(result)
                 getView()?.showToast("추가되었습니다.")
             }
@@ -40,7 +41,7 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter, BasePr
         CoroutineScope(Default).launch {
             interactor.deleteResult(result)
 
-            withContext(Main){
+            withContext(Main) {
                 getView()?.deleteAdapterList(result)
                 getView()?.showToast("삭제되었습니다.")
             }
@@ -51,13 +52,13 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter, BasePr
         getView()?.showFilteredList(str)
     }
 
-    private fun typeCheck(url: String) : String{
+    private fun typeCheck(url: String): String {
         val lowCase = url.toLowerCase(Locale.ROOT)
-        return when{
-            lowCase.contains("mailto") ->  Type.EMAIL.name
-            lowCase.contains("tel") -> Type.TELEPHONE.name
-            lowCase.contains("sms") -> Type.SMS.name
-            lowCase.contains("geo") -> Type.MAP.name
+        return when {
+            lowCase.startsWith("mailto") -> Type.EMAIL.name
+            lowCase.startsWith("tel") -> Type.TELEPHONE.name
+            lowCase.startsWith("sms") -> Type.SMS.name
+            lowCase.startsWith("geo") -> Type.MAP.name
             else -> Type.URl.name
         }
     }
