@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,11 +38,13 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
         setPresenter()
         setListener()
     }
 
+    /**
+     *  데이터베이스에 저장되어있는 값들을 가져오면서 adapter 설정
+     */
     private fun setPresenter() {
         presenter = Presenter(Interactor(this))
         presenter.setView(this)
@@ -58,6 +59,9 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         recycler_view.adapter = adapter
     }
 
+    /**
+     *  검색창에 입력시 필터적용으로 바로바로 화면이 바뀌도록 설정
+     */
     private fun setListener() {
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -106,7 +110,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         moveSettingPage = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            Log.d("jungbong", it.data.toString())
         }
     }
 
@@ -189,6 +192,9 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         dialog.show()
     }
 
+    /**
+     *  길게 클릭했을때 삭제
+     */
     override fun onLongClick(result: Result): Boolean {
         val dialog = AlertDialog.Builder(this)
         dialog.setTitle("Delete")
@@ -197,14 +203,18 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         dialog.setPositiveButton("삭제") { _, _ ->
             presenter.deleteResult(result)
         }
-        dialog.setNegativeButton("취소") { _, _ ->
-
+        dialog.setNegativeButton("취소") { view, _ ->
+            view.dismiss()
         }
+
         dialog.show()
 
         return true
     }
 
+    /**
+     *  일반 클릭시 해당 uri를 사용하여 다른앱 실행
+     */
     override fun onClick(result: Result) {
         try {
             val intent: Intent? = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))
@@ -213,7 +223,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
             e.printStackTrace()
             showToast("해당 결과를 실행할 수 없습니다.")
         }
-
     }
 
     override fun addAdapterList(result: Result) {
@@ -223,6 +232,7 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
     override fun deleteAdapterList(result: Result) {
         adapter.deleteResult(result)
     }
+
 
     override fun showFilteredList(str: String) {
         adapter.filter.filter(str)

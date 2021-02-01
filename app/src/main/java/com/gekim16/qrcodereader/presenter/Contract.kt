@@ -2,7 +2,6 @@ package com.gekim16.qrcodereader.presenter
 
 import com.gekim16.qrcodereader.model.Result
 
-
 interface Contract {
     interface View{
         fun addAdapterList(result: Result)

@@ -9,6 +9,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
 
+/**
+ *  Room으로의 접근은 Coroutine을 사용하여 비동기적으로 처리하고 화면을 변경하기 위해
+ *  Main Thread에서 화면을 변경하는 메소드를 호출하는 방식으로 구현
+ *
+ *  View에서 생성된 Interactor 객체를 통해서 Room 접근
+ */
 class Presenter(private val interactor: Interactor) : Contract.Presenter,
     BasePresenter<Contract.View>() {
 
@@ -52,6 +58,9 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter,
         getView()?.showFilteredList(str)
     }
 
+    /**
+     *  Result를 저장하기전 어떤 타입인지 확인하는 메소드
+     */
     private fun typeCheck(url: String): String {
         val lowCase = url.toLowerCase(Locale.ROOT)
         return when {

@@ -19,6 +19,9 @@ class ResultAdapter(
 ) : RecyclerView.Adapter<ResultAdapter.ViewHolder>(),
     Filterable {
 
+    /**
+     *  Filter 기능을 위해서 전달받은 리스트가 아닌 필더링된 리스트를 사용하여 화면에 보여줌
+     */
     private var filteredItems = resultList
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -38,10 +41,12 @@ class ResultAdapter(
                 context.getString(R.string.text_recycler_view, result.url, result.type)
         }
 
+        /**
+         *  MainActivity에서 구현되어 전달받은 clickListener를 사용하여 등록
+         */
         override fun onClick(v: View?) {
             clickListener.onClick(this.result)
         }
-
         override fun onLongClick(v: View?): Boolean {
             return clickListener.onLongClick(this.result)
         }
@@ -59,6 +64,10 @@ class ResultAdapter(
         holder.bind(filteredItems[position], position + 1)
     }
 
+
+    /**
+     *  Filterable을 상속받아 getFilter 오버라이드
+     */
     override fun getFilter(): Filter {
         return object : Filter() {
             override fun performFiltering(constraint: CharSequence?): FilterResults {

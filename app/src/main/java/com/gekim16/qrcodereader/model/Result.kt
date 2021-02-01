@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class Result(
     @PrimaryKey(autoGenerate = true) val id: Int? = null,
-    @ColumnInfo(name = "type") val type: String = "URL",
+    @ColumnInfo(name = "type") val type: String = "",
     @ColumnInfo(name = "url") val url: String = ""
 )
 
