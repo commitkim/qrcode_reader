@@ -48,5 +48,4 @@ dependencies {
 
     // Coroutine support for room
     implementation 'androidx.room:room-ktx:2.2.6'
-
 }

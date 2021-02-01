@@ -3,7 +3,7 @@ package com.gekim16.qrcodereader.presenter
 import com.gekim16.qrcodereader.model.Result
 import com.gekim16.qrcodereader.model.Type
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter,
 
     override fun getResults(callbacks: (MutableList<Result>) -> Unit) {
         val results = mutableListOf<Result>()
-        CoroutineScope(Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             results.addAll(interactor.getResults())
 
             withContext(Main) {
@@ -33,7 +33,7 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter,
     override fun addResult(url: String) {
         val result = Result(type = typeCheck(url), url = url)
 
-        CoroutineScope(Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             interactor.addResult(result)
 
             withContext(Main) {
@@ -44,7 +44,7 @@ class Presenter(private val interactor: Interactor) : Contract.Presenter,
     }
 
     override fun deleteResult(result: Result) {
-        CoroutineScope(Default).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             interactor.deleteResult(result)
 
             withContext(Main) {
