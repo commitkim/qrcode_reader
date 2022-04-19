@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.gekim16.qrcodereader.BuildConfig
 import com.gekim16.qrcodereader.R
 import com.gekim16.qrcodereader.model.Result
-import com.gekim16.qrcodereader.presenter.Contract
-import com.gekim16.qrcodereader.presenter.Interactor
+import com.gekim16.qrcodereader.Contract
+import com.gekim16.qrcodereader.model.Interactor
 import com.gekim16.qrcodereader.presenter.Presenter
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.android.synthetic.main.activity_main.*
@@ -166,9 +166,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         dialog.show()
     }
 
-    /**
-     *  길게 클릭했을때 삭제
-     */
     override fun onLongClick(result: Result): Boolean {
         val dialog = AlertDialog.Builder(this)
         dialog.setTitle("Delete")
@@ -186,9 +183,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         return true
     }
 
-    /**
-     *  일반 클릭시 해당 uri를 사용하여 다른앱 실행
-     */
     override fun onClick(result: Result) {
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))

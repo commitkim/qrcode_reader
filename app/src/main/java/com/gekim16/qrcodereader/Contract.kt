@@ -1,4 +1,4 @@
-package com.gekim16.qrcodereader.presenter
+package com.gekim16.qrcodereader
 
 import com.gekim16.qrcodereader.model.Result
 
@@ -22,4 +22,14 @@ interface Contract {
 
         fun filterResult(str: String)
     }
+}
+
+abstract class BasePresenter<V>: Contract.Presenter {
+    private var view: V? = null
+
+    fun setView(view: V) {
+        this.view = view
+    }
+
+    fun getView() = this.view
 }
