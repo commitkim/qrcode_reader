@@ -42,9 +42,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         setListener()
     }
 
-    /**
-     *  데이터베이스에 저장되어있는 값들을 가져오면서 adapter 설정
-     */
     private fun setPresenter() {
         presenter = Presenter(Interactor(this))
         presenter.setView(this)
@@ -59,9 +56,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         recycler_view.adapter = adapter
     }
 
-    /**
-     *  검색창에 입력시 필터적용으로 바로바로 화면이 바뀌도록 설정
-     */
     private fun setListener() {
         editText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -75,11 +69,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
             }
         })
 
-        /**
-         *   1. 버튼을 누름 (첫 번째 시도) -> 권한 요청 (requestPermission())
-         *   4. 다시 버튼을 누름 (한번 거절 후 시도) -> 권한 요청 (requestPermission())
-         *   8. 다시 버튼을 누름 (다시보지 않기 선택 후 시도) -> 설정창으로 이동하는 dialog 띄워야함 (showRequestPermissionDialog())
-         */
         floatingActionButton.setOnClickListener {
             if (ContextCompat.checkSelfPermission(
                     applicationContext,
@@ -92,10 +81,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
             }
         }
 
-        /**
-         *  3. callback else 분기 실행 (한번 요청하고 난 뒤기 때문에 else 안의 if 문은 실행이 되지 않는다.)
-         *  7. 다시보지 않기 선택 후 거절 -> else 분기 실행 (다시보지 않기를 선택했기 때문에 else 안의 if 문이 실행된다.)
-         */
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
@@ -137,11 +122,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         }
     }
 
-    /**
-     *  2. 권한 요청 (1,2 -> false) 3 실행
-     *  5. 권한 재요청 (1 -> false, 한번 거절했기 때문에 2 -> true) 2 실행 (설명 dialog(확인) 후 권한 요청)
-     *
-     */
     private fun requestPermission() {
         when {
             ContextCompat.checkSelfPermission(
@@ -159,9 +139,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         }
     }
 
-    /**
-     *  6. 권한 설명 후 권한 요청
-     */
     private fun showPermissionRationaleDialog(message: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Permission").setMessage(message)
@@ -172,9 +149,6 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
         builder.create().show()
     }
 
-    /**
-     *  9. 권한 재재요청 ALLOW 선택시 설정창으로 이동
-     */
     private fun showPermissionRationaleDialog() {
         val dialog = AlertDialog.Builder(this)
         dialog.setTitle("Permission")
@@ -217,7 +191,7 @@ class MainActivity : AppCompatActivity(), Contract.View, ResultAdapter.OnClickLi
      */
     override fun onClick(result: Result) {
         try {
-            val intent: Intent? = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.url))
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
